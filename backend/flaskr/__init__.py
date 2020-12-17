@@ -20,11 +20,14 @@ def create_app(test_config=None):
         response.headers.add('Access-Control-Allow-Methods', 'GET,PATCH,POST,DELETE,OPTIONS')
         return response
 
-    '''
-    @TODO: 
-    Create an endpoint to handle GET requests 
-    for all available categories.
-    '''
+    @app.route('/categories')
+    def get_categories():
+        categories = Category.query.all()
+        formated_categories = [category.format() for category in categories]
+        return jsonify({
+          'success':True,
+          'categories':formated_categories
+        })
 
 
     '''
@@ -39,6 +42,18 @@ def create_app(test_config=None):
     ten questions per page and pagination at the bottom of the screen for three pages.
     Clicking on the page numbers should update the questions.
     '''
+    @app.route('/questions')
+    def get_questions():
+        page = request.args.get('page', 1, type=int)
+        start = (page-1) * 10
+        end = start + 10  
+        questions = Question.query.all()
+        formated_questions = [question.format() for question in questions]
+        return jsonify({
+          'success':True,
+          'questions':formated_questions[start:end],
+          'total_questions': len(formated_questions)
+        })
 
     '''
     @TODO:
