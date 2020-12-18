@@ -49,13 +49,30 @@ class TriviaTestCase(unittest.TestCase):
         self.assertTrue(data['total_questions'])
         self.assertTrue(len(data['questions']))
 
-    def tast_404_sent_requesting_beyond_valid_page(self):
+    def test_404_sent_requesting_beyond_valid_page(self):
         res = self.client().get('/questions?page=10000', json={'rating': 1})
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 404)
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'resource not found')
+
+    def test_delete_question(self):
+        res = self.client().delete('/question/2')
+        data = json.loads(res.data)
+
+        question = Question.query.filter(Question.id == 2).one_or_none()
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+
+    def test_404_if_question_does_not_exist(self):
+        res = self.client().delete('/question/20000')
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 422)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'Unprocessable Entity')
 # Make the tests conveniently executable
 if __name__ == "__main__":
     unittest.main()
