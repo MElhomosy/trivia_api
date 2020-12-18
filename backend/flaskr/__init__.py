@@ -22,7 +22,7 @@ def create_app(test_config=None):
 
     @app.route('/categories')
     def retrieve_categories():
-        categories = Category.query.order_by(Question.id).all()
+        categories = Category.query.order_by(Category.id).all()
         formated_categories = [category.format() for category in categories]
         return jsonify({
           'success':True,
@@ -129,10 +129,20 @@ def create_app(test_config=None):
     and shown whether they were correct or not.
     '''
 
-    '''
-    @TODO:
-    Create error handlers for all expected errors
-    including 404 and 422.
-    '''
+    @app.errorhandler(104)
+    def not_found(error):
+        return jsonify({
+            "success": False, 
+            "error": 404,
+            "message": "resource not found"
+            }), 404
+
+    @app.errorhandler(422)
+    def unprocessable_entity(error):
+        return jsonify({
+            "success": False, 
+            "error": 422,
+            "message": "Unprocessable Entity"
+            }), 422
 
     return app
