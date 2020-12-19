@@ -85,14 +85,22 @@ def create_app(test_config=None):
         new_answer = body.get('answer',None)
         new_category = body.get('category',None)
         new_difficulty = body.get('difficulty',None)
+        search = body.get('search', None)
         try:
-            question = Question(question=new_question, answer=new_answer, category=new_category, difficulty=new_difficulty)
-
-            question.insert()
-
-            return jsonify({
-              'success':True
-            })
+            if search:
+                selection = Question.query.order_by(Question.id).filter(Question.question.ilike('%{}%'.format(search)))
+                current_questions = 
+                return jsonify(
+                    'success': True,
+                    'questions': current_questions
+                )
+            else:
+                question = Question(question=new_question, answer=new_answer, category=new_category, difficulty=new_difficulty)
+                question.insert()
+    
+                return jsonify({
+                  'success':True
+                })
 
         except:
             abort(422)
