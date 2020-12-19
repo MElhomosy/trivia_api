@@ -24,6 +24,12 @@ class TriviaTestCase(unittest.TestCase):
             self.db.init_app(self.app)
             # create all tables
             self.db.create_all()
+        self.new_question = {
+            'question': 'what\'s the Capital of Egypt?'
+            'answer': 'Cairo'
+            'caregory': 1
+            'difficulty': 2
+        }
 
     def tearDown(self):
         """Executed after reach test"""
@@ -65,6 +71,7 @@ class TriviaTestCase(unittest.TestCase):
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
+        self.assertEqual(question, None)
 
     def test_404_if_question_does_not_exist(self):
         res = self.client().delete('/question/20000')
@@ -73,6 +80,23 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(res.status_code, 422)
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'Unprocessable Entity')
+
+    def test_create_new_question(self):
+        res = self.client().post('/question' json=new_question)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 200)
+        self.assertEqual(data['success'], True)
+        self.assertEqual(question, None)
+
+    def test_if_question_creation_not_allowed(self):
+        res = self.client().post('/question/50' json=new_question)
+        data = json.loads(res.data)
+
+        self.assertEqual(res.status_code, 405)
+        self.assertEqual(data['success'], False)
+        self.assertEqual(data['message'], 'method not allowed')
+
 # Make the tests conveniently executable
 if __name__ == "__main__":
     unittest.main()
