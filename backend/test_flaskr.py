@@ -25,9 +25,9 @@ class TriviaTestCase(unittest.TestCase):
             # create all tables
             self.db.create_all()
         self.new_question = {
-            'question': 'what\'s the Capital of Egypt?'
-            'answer': 'Cairo'
-            'caregory': 1
+            'question': 'what\'s the Capital of Egypt?',
+            'answer': 'Cairo',
+            'caregory': 1,
             'difficulty': 2
         }
 
@@ -82,7 +82,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['message'], 'Unprocessable Entity')
 
     def test_create_new_question(self):
-        res = self.client().post('/question' json=new_question)
+        res = self.client().post('/question', json=new_question)
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
@@ -90,7 +90,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(question, None)
 
     def test_if_question_creation_not_allowed(self):
-        res = self.client().post('/question/50' json=new_question)
+        res = self.client().post('/question/50', json=new_question)
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 405)
@@ -105,7 +105,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['success'], True)
         self.assertEqual(len(data['questions']), 5)
 
-    def test_get_question_search_with_results(self):
+    def test_get_question_search_without_results(self):
         res = self.client().post('/questions', json={'search': 'else'})
         data = json.loads(res.data)
 
