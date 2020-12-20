@@ -58,9 +58,14 @@ def create_app(test_config=None):
                 abort(404)
 
             question.delete()
+            questions = Question.query.order_by(Question.id).all()
+            formated_questions = [question.format() for question in questions]
+
 
             return jsonify({
-              'success':True
+              'success':True,
+              'deleted':question.id,
+              'questions': formated_questions
             })
 
         except:
@@ -119,17 +124,6 @@ def create_app(test_config=None):
           'current_category': category_id
         })
 
-    '''
-    @TODO:
-    Create a POST endpoint to get questions to play the quiz.
-    This endpoint should take category and previous question parameters
-    and return a random questions within the given category,
-    if provided, and that is not one of the previous questions.
-
-    TEST: In the "Play" tab, after a user selects "All" or a category,
-    one question at a time is displayed, the user is allowed to answer
-    and shown whether they were correct or not.
-    '''
     @app.route('/quizzes', methods=['POST'])
     def retrieve_questions_for_quiz(category_id):
         body = request.get_json()
@@ -170,5 +164,13 @@ def create_app(test_config=None):
             "error": 422,
             "message": "Unprocessable Entity"
             }), 422
+
+    @app.errorhandler(500)
+    def server_error(error):
+        return jsonify({
+            "success": False, 
+            "error": 500,
+            "message": "Internal Server Error"
+            }), 500
 
     return app
