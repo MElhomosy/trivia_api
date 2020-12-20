@@ -6,7 +6,6 @@ from flask_sqlalchemy import SQLAlchemy
 from flaskr import create_app
 from models import setup_db, Question, Category
 
-
 class TriviaTestCase(unittest.TestCase):
     """This class represents the trivia test case"""
 
@@ -14,8 +13,15 @@ class TriviaTestCase(unittest.TestCase):
         """Define test variables and initialize app."""
         self.app = create_app()
         self.client = self.app.test_client
-        self.database_name = "trivia_test"
-        self.database_path = "postgres://{}/{}".format('localhost:5432', self.database_name)
+        self.database_host = os.getenv('DB_HOST', '127.0.0.1:5432')
+        self.database_user = os.getenv('DB_USER', 'postgres')
+        self.database_password = os.getenv('DB_PASSWORD', 'postgres')
+        self.database_name = os.getenv('DB_NAME', 'trivia_test')
+        self.database_path = "postgres://{}:{}@{}/{}".format(
+            self.database_user,
+            self.database_password,
+            self.database_host,
+            self.database_name)
         setup_db(self.app, self.database_path)
 
         # binds the app to the current context
@@ -77,12 +83,12 @@ class TriviaTestCase(unittest.TestCase):
         res = self.client().delete('/question/20000')
         data = json.loads(res.data)
 
-        self.assertEqual(res.status_code, 422)
+        self.assertEqual(res.status_code, 404)
         self.assertEqual(data['success'], False)
         self.assertEqual(data['message'], 'Unprocessable Entity')
 
     def test_create_new_question(self):
-        res = self.client().post('/question', json=new_question)
+        res = self.client().post('/question', json=self.new_question)
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 200)
@@ -90,7 +96,7 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(question, None)
 
     def test_if_question_creation_not_allowed(self):
-        res = self.client().post('/question/50', json=new_question)
+        res = self.client().post('/question/50', json=self.new_question)
         data = json.loads(res.data)
 
         self.assertEqual(res.status_code, 405)
