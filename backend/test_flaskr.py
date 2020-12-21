@@ -16,7 +16,7 @@ class TriviaTestCase(unittest.TestCase):
         self.database_host = os.getenv('DB_HOST', '127.0.0.1:5432')
         self.database_user = os.getenv('DB_USER', 'postgres')
         self.database_password = os.getenv('DB_PASSWORD', 'postgres')
-        self.database_name = os.getenv('DB_NAME', 'trivia_test')
+        self.database_name = os.getenv('DB_NAME', 'trivia')
         self.database_path = "postgres://{}:{}@{}/{}".format(
             self.database_user,
             self.database_password,
@@ -33,7 +33,7 @@ class TriviaTestCase(unittest.TestCase):
         self.new_question = {
             'question': 'what\'s the Capital of Egypt?',
             'answer': 'Cairo',
-            'caregory': 1,
+            'category': 1,
             'difficulty': 2
         }
 
@@ -41,10 +41,6 @@ class TriviaTestCase(unittest.TestCase):
         """Executed after reach test"""
         pass
 
-    """
-    TODO
-    Write at least one test for each test for successful operation and for expected errors.
-    """
     def test_get_categories(self):
         res = self.client().get('/categories')
         data = json.loads(res.data)
@@ -70,22 +66,22 @@ class TriviaTestCase(unittest.TestCase):
         self.assertEqual(data['message'], 'resource not found')
 
     def test_delete_question(self):
-        res = self.client().delete('/questions/2')
+        res = self.client().delete('/questions/12')
         data = json.loads(res.data)
 
-        question = Question.query.filter(Question.id == 2).one_or_none()
+        question = Question.query.filter(Question.id == 12).one_or_none()
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
         self.assertEqual(question, None)
 
-    def test_404_if_question_does_not_exist(self):
+    def test_422_if_question_does_not_exist(self):
         res = self.client().delete('/questions/20000')
         data = json.loads(res.data)
 
-        self.assertEqual(res.status_code, 404)
+        self.assertEqual(res.status_code, 422)
         self.assertEqual(data['success'], False)
-        self.assertEqual(data['message'], 'resource not found')
+        self.assertEqual(data['message'], 'Unprocessable Entity')
 
     def test_create_new_question(self):
         res = self.client().post('/questions', json=self.new_question)
@@ -93,7 +89,6 @@ class TriviaTestCase(unittest.TestCase):
 
         self.assertEqual(res.status_code, 200)
         self.assertEqual(data['success'], True)
-        self.assertEqual(question, None)
 
     def test_if_question_creation_not_allowed(self):
         res = self.client().post('/questions/50', json=self.new_question)
